@@ -8,6 +8,6 @@ public class BeatmapContent
     [JsonPropertyName("beatmap_id")]
     public int BeatmapId { get; init; }
 
-    [JsonPropertyName("grade_cutoffs")]
-    public JsonElement[] GradeCutoffs { get; init; } = [];
+    [JsonPropertyName("criteria_tables")]
+    public JsonElement[] CriteriaTables { get; init; } = [];
 }

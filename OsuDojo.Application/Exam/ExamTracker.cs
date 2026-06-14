@@ -24,10 +24,10 @@ public class ExamTracker<T> : IExamTracker where T : ICriteriaTable
                 totalLengths[i]);
 
             _beatmapStages[i].SetUpCriteria(
-                examQuery.ExamContent.BeatmapContents[i].GradeCutoffs.Select(x => x.Deserialize<T>()));
+                examQuery.ExamContent.BeatmapContents[i].CriteriaTables.Select(x => x.Deserialize<T>()));
         }
 
-        _finalStage.SetUpCriteria(examQuery.ExamContent.OverallGradeCutoffs.Select(x => x.Deserialize<T>()));
+        _finalStage.SetUpCriteria(examQuery.ExamContent.CriteriaTables.Select(x => x.Deserialize<T>()));
     }
 
     public int CurrentStage => Math.Min(_currentStageIndex + 1, _beatmapStages.Length);
