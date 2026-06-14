@@ -39,7 +39,9 @@ public class OAuthController(
     {
         var tokenQuery = await _osuAuthService.ExchangeTokenAsync(request.Code);
         var osuId = await _osuAuthService.GetUserIdAsync(tokenQuery.AccessToken);
-        var userRoleQuery = await _userRepository.GetRoleAsync(osuId) ?? await _userRepository.CreateAsync(osuId);
+
+        var userRoleQuery = await _userRepository.GetRoleByOsuIdAsync(osuId)
+            ?? await _userRepository.CreateAsync(osuId);
 
         var loginSessionContext = new LoginSessionContext
         {

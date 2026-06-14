@@ -9,9 +9,6 @@ public class RankCertificate : BaseModel
     [PrimaryKey("id")]
     public int Id { get; init; }
 
-    [Column("user_id")]
-    public int UserId { get; init; }
-
     [Column("exam_session_id")]
     public int ExamSessionId { get; init; }
 

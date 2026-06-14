@@ -93,14 +93,14 @@ public class ExamController(
             return Unauthorized();
         }
 
-        var inProgressExamSessionId = await _examSessionRepository.GetInProgressIdAsync(osuId);
+        var inProgressExamSessionId = await _examSessionRepository.GetInProgressIdAsync(userId);
 
         if (inProgressExamSessionId != null)
         {
             return Conflict(new ExamSessionResponse { Id = inProgressExamSessionId.Value });
         }
 
-        if ((await _userRepository.GetRankAsync(osuId, gameMode)).Rank < examQuery.RequiredRank)
+        if ((await _userRepository.GetRankAsync(userId, gameMode)).Rank < examQuery.RequiredRank)
         {
             return BadRequest("User does not meet the lowest rank requirement.");
         }
@@ -141,7 +141,7 @@ public class ExamController(
             return BadRequest(new ExamSessionResponse { IsRoomActive = true, IsPlaylistCorrect = isPlaylistCorrect });
         }
 
-        var examSessionId = await _examSessionRepository.CreateAsync(osuId, examQuery.ExamId);
+        var examSessionId = await _examSessionRepository.CreateAsync(userId, examQuery.ExamId);
 
         var examSessionContext = new ExamSessionContext
         {

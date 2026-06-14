@@ -10,14 +10,13 @@ public class RankCertificateRepository(Supabase.Client database) : IRankCertific
 {
     private readonly Supabase.Client _database = database;
 
-    public async Task<int> CreateAsync(int userId, int examSessionId, int passGrade, StageResult[] stageResults)
+    public async Task<int> CreateAsync(int examSessionId, int passGrade, StageResult[] stageResults)
     {
         var response = await _database
             .From<RankCertificate>()
             .Insert(
                 new RankCertificate
                 {
-                    UserId = userId,
                     ExamSessionId = examSessionId,
                     PassGrade = passGrade,
                     DetailedResult = JsonSerializer.Serialize(stageResults)

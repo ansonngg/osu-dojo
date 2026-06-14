@@ -52,7 +52,6 @@ public class BeatmapResultPollingWorker(
                 _examSessionContext.Status = ExamSessionStatus.Passed;
 
                 var rankCertificateId = await _rankCertificateRepository.CreateAsync(
-                    _examSessionContext.UserId,
                     _examSessionContext.ExamSessionId,
                     _examSessionContext.ExamTracker.PassGrade,
                     _examSessionContext.ExamTracker.StageResults);

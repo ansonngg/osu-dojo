@@ -3,6 +3,7 @@ using Supabase.Postgrest.Models;
 
 namespace OsuDojo.Infrastructure.Model;
 
+[Table("user_best_certificate")]
 public class UserBestCertificate : BaseModel
 {
     [PrimaryKey("id")]

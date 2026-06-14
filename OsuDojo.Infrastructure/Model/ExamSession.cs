@@ -9,8 +9,8 @@ public class ExamSession : BaseModel
     [PrimaryKey("id")]
     public int Id { get; init; }
 
-    [Column("osu_id")]
-    public int OsuId { get; init; }
+    [Column("user_id")]
+    public int UserId { get; init; }
 
     [Column("exam_id")]
     public int ExamId { get; init; }

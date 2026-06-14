@@ -9,7 +9,20 @@ public class UserRepository(Supabase.Client database) : IUserRepository
 {
     private readonly Supabase.Client _database = database;
 
-    public async Task<UserRoleQuery?> GetRoleAsync(int osuId)
+    public async Task<UserRoleQuery> GetRoleAsync(int userId)
+    {
+        var response = await _database
+            .From<User>()
+            .Select(x => new object[] { x.Roles })
+            .Where(x => x.Id == userId)
+            .Single();
+
+        return response != null
+            ? new UserRoleQuery { UserId = userId, Roles = response.Roles }
+            : throw new NullReferenceException("Returned user is null.");
+    }
+
+    public async Task<UserRoleQuery?> GetRoleByOsuIdAsync(int osuId)
     {
         var response = await _database
             .From<User>()
@@ -20,7 +33,7 @@ public class UserRepository(Supabase.Client database) : IUserRepository
         return response != null ? new UserRoleQuery { UserId = response.Id, Roles = response.Roles } : null;
     }
 
-    public async Task<UserRankQuery> GetRankAsync(int osuId, string gameMode)
+    public async Task<UserRankQuery> GetRankAsync(int userId, string gameMode)
     {
         switch (gameMode)
         {
@@ -29,7 +42,7 @@ public class UserRepository(Supabase.Client database) : IUserRepository
                 var response = await _database
                     .From<User>()
                     .Select(x => new object[] { x.OsuRank })
-                    .Where(x => x.OsuId == osuId)
+                    .Where(x => x.Id == userId)
                     .Single();
 
                 if (response != null)
@@ -44,7 +57,7 @@ public class UserRepository(Supabase.Client database) : IUserRepository
                 var response = await _database
                     .From<User>()
                     .Select(x => new object[] { x.TaikoRank })
-                    .Where(x => x.OsuId == osuId)
+                    .Where(x => x.Id == userId)
                     .Single();
 
                 if (response != null)
@@ -59,7 +72,7 @@ public class UserRepository(Supabase.Client database) : IUserRepository
                 var response = await _database
                     .From<User>()
                     .Select(x => new object[] { x.CatchRank })
-                    .Where(x => x.OsuId == osuId)
+                    .Where(x => x.Id == userId)
                     .Single();
 
                 if (response != null)
@@ -74,7 +87,7 @@ public class UserRepository(Supabase.Client database) : IUserRepository
                 var response = await _database
                     .From<User>()
                     .Select(x => new object[] { x.ManiaRank })
-                    .Where(x => x.OsuId == osuId)
+                    .Where(x => x.Id == userId)
                     .Single();
 
                 if (response != null)

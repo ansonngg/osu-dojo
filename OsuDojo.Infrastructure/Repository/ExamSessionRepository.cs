@@ -8,23 +8,23 @@ public class ExamSessionRepository(Supabase.Client database) : IExamSessionRepos
 {
     private readonly Supabase.Client _database = database;
 
-    public async Task<int> CreateAsync(int osuId, int examId)
+    public async Task<int> CreateAsync(int userId, int examId)
     {
         var response = await _database
             .From<ExamSession>()
             .Insert(
-                new ExamSession { OsuId = osuId, ExamId = examId },
+                new ExamSession { UserId = userId, ExamId = examId },
                 new QueryOptions { Returning = QueryOptions.ReturnType.Representation });
 
         return response.Model?.Id ?? throw new NullReferenceException("Returned exam session is null.");
     }
 
-    public async Task<int?> GetInProgressIdAsync(int osuId)
+    public async Task<int?> GetInProgressIdAsync(int userId)
     {
         var response = await _database
             .From<ExamSession>()
             .Select(x => new object[] { x.Id })
-            .Where(x => x.OsuId == osuId && x.Status == "in_progress")
+            .Where(x => x.UserId == userId && x.Status == "in_progress")
             .Single();
 
         return response?.Id;

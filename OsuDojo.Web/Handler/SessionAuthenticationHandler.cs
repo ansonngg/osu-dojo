@@ -55,7 +55,7 @@ public class SessionAuthenticationHandler(
                 return AuthenticateResult.NoResult();
             }
 
-            var roles = (await _userRepository.GetRoleAsync(loginSessionContext.OsuId))
+            var roles = (await _userRepository.GetRoleAsync(loginSessionContext.UserId))
                 ?.Roles
                 .Select(x => x.ToPascalCase())
                 .ToArray();
