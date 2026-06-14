@@ -17,7 +17,8 @@ public static class EnumExtension
 
         for (var i = 1; i < text.Length; ++i)
         {
-            if (char.IsUpper(text[i]) && !char.IsUpper(text[i - 1]))
+            if (char.IsUpper(text[i])
+                && (!char.IsUpper(text[i - 1]) || i < text.Length - 1 && !char.IsUpper(text[i + 1])))
             {
                 stringBuilder.Append('_');
             }

@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
-using OsuDojo.Application.Interface;
 
 namespace OsuDojo.Application.Service;
 

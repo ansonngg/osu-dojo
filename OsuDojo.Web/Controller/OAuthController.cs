@@ -2,9 +2,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using OsuDojo.Application.Context;
-using OsuDojo.Application.Interface;
 using OsuDojo.Application.Options;
-using OsuDojo.Web.Const;
+using OsuDojo.Application.Repository;
+using OsuDojo.Application.Service;
 using OsuDojo.Web.Request;
 using OsuDojo.Web.Response;
 using OsuDojo.Web.Utility;
@@ -39,13 +39,13 @@ public class OAuthController(
     {
         var tokenQuery = await _osuAuthService.ExchangeTokenAsync(request.Code);
         var osuId = await _osuAuthService.GetUserIdAsync(tokenQuery.AccessToken);
-        var userRoleQuery = await _userRepository.GetUserRoleAsync(osuId) ?? await _userRepository.CreateAsync(osuId);
+        var userRoleQuery = await _userRepository.GetRoleAsync(osuId) ?? await _userRepository.CreateAsync(osuId);
 
         var loginSessionContext = new LoginSessionContext
         {
             UserId = userRoleQuery.UserId,
             OsuId = osuId,
-            Role = userRoleQuery.Role,
+            Roles = userRoleQuery.Roles.Select(x => x.ToPascalCase()).ToArray(),
             AccessToken = tokenQuery.AccessToken,
             RefreshToken = tokenQuery.RefreshToken,
             ExpiresAt = tokenQuery.ExpiresAt
@@ -54,7 +54,7 @@ public class OAuthController(
         var sessionId = await _loginService.CreateLoginSessionAsync(loginSessionContext);
 
         Response.Cookies.Append(
-            AppDefaults.SessionIdCookieName,
+            AuthenticationSettings.SessionCookieName,
             sessionId,
             DateTimeOffset.UtcNow.AddDays(_cookieSessionExpiryInDay));
 
@@ -66,7 +66,7 @@ public class OAuthController(
     [HttpPost("logout")]
     public async Task<IActionResult> Logout()
     {
-        var sessionId = Request.Cookies[AppDefaults.SessionIdCookieName];
+        var sessionId = Request.Cookies[AuthenticationSettings.SessionCookieName];
 
         if (string.IsNullOrEmpty(sessionId))
         {
@@ -74,7 +74,7 @@ public class OAuthController(
         }
 
         await _loginService.DeleteLoginSessionAsync(sessionId);
-        Response.Cookies.Delete(AppDefaults.SessionIdCookieName);
+        Response.Cookies.Delete(AuthenticationSettings.SessionCookieName);
         return Ok();
     }
 }

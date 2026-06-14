@@ -1,10 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authentication;
-using OsuDojo.Application.Interface;
 using OsuDojo.Application.Options;
+using OsuDojo.Application.Repository;
 using OsuDojo.Application.Service;
 using OsuDojo.Infrastructure.Repository;
 using OsuDojo.Infrastructure.Service;
-using OsuDojo.Web.Const;
 using OsuDojo.Web.Handler;
 using Supabase;
 
@@ -47,6 +46,7 @@ public static class DependencyInjection
 
             services.AddHttpClient<ISessionService, RedisSessionService>();
             services.AddSingleton<ILoginService, LoginService>();
+            services.AddSingleton<IExamService, ExamService>();
             services.AddSingleton<CachedSessionService>();
         }
 
@@ -55,11 +55,11 @@ public static class DependencyInjection
             services.AddAuthentication(
                     options =>
                     {
-                        options.DefaultAuthenticateScheme = AppDefaults.AuthenticationScheme;
-                        options.DefaultChallengeScheme = AppDefaults.AuthenticationScheme;
+                        options.DefaultAuthenticateScheme = AuthenticationSettings.AuthenticationScheme;
+                        options.DefaultChallengeScheme = AuthenticationSettings.AuthenticationScheme;
                     })
                 .AddScheme<AuthenticationSchemeOptions, SessionAuthenticationHandler>(
-                    AppDefaults.AuthenticationScheme,
+                    AuthenticationSettings.AuthenticationScheme,
                     null);
 
             services.AddTransient<OsuAuthHeaderHandler>();
@@ -69,7 +69,7 @@ public static class DependencyInjection
         {
             services.AddSingleton<IExamRepository, ExamRepository>();
             services.AddSingleton<IExamSessionRepository, ExamSessionRepository>();
-            services.AddSingleton<IGradeCertificateRepository, GradeCertificateRepository>();
+            services.AddSingleton<IRankCertificateRepository, RankCertificateRepository>();
             services.AddSingleton<IUserRepository, UserRepository>();
         }
 

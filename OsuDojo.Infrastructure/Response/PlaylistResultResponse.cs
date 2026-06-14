@@ -22,6 +22,8 @@ public class ScoreResposne
 
 public class ModResponse
 {
+    [JsonPropertyName("acronym")]
+    public string Acronym { get; init; } = string.Empty;
 }
 
 public class StatisticsResponse

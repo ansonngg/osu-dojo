@@ -2,8 +2,8 @@
 using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.Extensions.Options;
-using OsuDojo.Application.Interface;
 using OsuDojo.Application.Options;
+using OsuDojo.Application.Service;
 using OsuDojo.Infrastructure.Response;
 
 namespace OsuDojo.Infrastructure.Service;

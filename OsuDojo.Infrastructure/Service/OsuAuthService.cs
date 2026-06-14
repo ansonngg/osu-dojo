@@ -3,9 +3,9 @@ using System.Net.Http.Json;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using OsuDojo.Application.Interface;
 using OsuDojo.Application.Options;
 using OsuDojo.Application.Query;
+using OsuDojo.Application.Service;
 using OsuDojo.Infrastructure.Response;
 
 namespace OsuDojo.Infrastructure.Service;

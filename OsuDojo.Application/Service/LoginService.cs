@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
 using OsuDojo.Application.Context;
-using OsuDojo.Application.Interface;
 using OsuDojo.Application.Options;
 
 namespace OsuDojo.Application.Service;

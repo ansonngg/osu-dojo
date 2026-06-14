@@ -3,9 +3,9 @@ using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
 using OsuDojo.Application.Context;
-using OsuDojo.Application.Interface;
 using OsuDojo.Application.Options;
-using OsuDojo.Web.Const;
+using OsuDojo.Application.Repository;
+using OsuDojo.Application.Service;
 using OsuDojo.Web.Utility;
 
 namespace OsuDojo.Web.Handler;
@@ -29,7 +29,7 @@ public class SessionAuthenticationHandler(
 
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        var sessionId = Request.Cookies[AppDefaults.SessionIdCookieName];
+        var sessionId = Request.Cookies[AuthenticationSettings.SessionCookieName];
 
         if (string.IsNullOrEmpty(sessionId))
         {
@@ -40,7 +40,7 @@ public class SessionAuthenticationHandler(
 
         if (loginSessionContext == null)
         {
-            Response.Cookies.Delete(AppDefaults.SessionIdCookieName);
+            Response.Cookies.Delete(AuthenticationSettings.SessionCookieName);
             return AuthenticateResult.NoResult();
         }
 
@@ -51,15 +51,20 @@ public class SessionAuthenticationHandler(
             if (newTokenQuery == null)
             {
                 await _loginService.DeleteLoginSessionAsync(sessionId);
-                Response.Cookies.Delete(AppDefaults.SessionIdCookieName);
+                Response.Cookies.Delete(AuthenticationSettings.SessionCookieName);
                 return AuthenticateResult.NoResult();
             }
+
+            var roles = (await _userRepository.GetRoleAsync(loginSessionContext.OsuId))
+                ?.Roles
+                .Select(x => x.ToPascalCase())
+                .ToArray();
 
             loginSessionContext = new LoginSessionContext
             {
                 UserId = loginSessionContext.UserId,
                 OsuId = loginSessionContext.OsuId,
-                Role = (await _userRepository.GetUserRoleAsync(loginSessionContext.OsuId))?.Role ?? "User",
+                Roles = roles ?? ["User"],
                 AccessToken = newTokenQuery.AccessToken,
                 RefreshToken = newTokenQuery.RefreshToken,
                 ExpiresAt = newTokenQuery.ExpiresAt
@@ -68,18 +73,19 @@ public class SessionAuthenticationHandler(
             await _loginService.UpdateLoginSessionAsync(sessionId, loginSessionContext);
 
             Response.Cookies.Append(
-                AppDefaults.SessionIdCookieName,
+                AuthenticationSettings.SessionCookieName,
                 sessionId,
                 DateTimeOffset.UtcNow.AddDays(_cookieSessionExpiryInDay));
         }
 
-        var claims = new[]
-        {
+        var claims = loginSessionContext.Roles.Select(x => new Claim(ClaimTypes.Role, x)).ToList();
+
+        claims.AddRange(
+        [
             new Claim(ClaimTypes.NameIdentifier, loginSessionContext.UserId.ToString()),
-            new Claim(ClaimTypes.Role, loginSessionContext.Role),
             new Claim(CustomClaimTypes.OsuId, loginSessionContext.OsuId.ToString()),
             new Claim(CustomClaimTypes.AccessToken, loginSessionContext.AccessToken)
-        };
+        ]);
 
         var identity = new ClaimsIdentity(claims, Scheme.Name);
         var principal = new ClaimsPrincipal(identity);

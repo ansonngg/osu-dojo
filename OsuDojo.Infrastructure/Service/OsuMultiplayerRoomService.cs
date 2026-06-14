@@ -1,8 +1,9 @@
 ﻿using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.WebUtilities;
-using OsuDojo.Application.Interface;
+using OsuDojo.Application.Exam;
 using OsuDojo.Application.Query;
+using OsuDojo.Application.Service;
 using OsuDojo.Infrastructure.Response;
 
 namespace OsuDojo.Infrastructure.Service;
@@ -104,13 +105,16 @@ public class OsuMultiplayerRoomService(HttpClient httpClient) : IOsuMultiplayerR
 
         return new BeatmapResultQuery
         {
-            GreatCount = statistics.Great,
-            OkCount = statistics.Ok,
-            MissCount = statistics.Miss,
-            LargeBonusCount = statistics.LargeBonus,
-            MaxCombo = playlistResultResponse.UserScore.MaxCombo,
-            HitCount = statistics.Great + statistics.Ok + statistics.SmallBonus,
-            HasMods = playlistResultResponse.UserScore.Mods is { Length: > 0 }
+            Result = new StageResult
+            {
+                Great = statistics.Great,
+                Ok = statistics.Ok,
+                Miss = statistics.Miss,
+                LargeBonus = statistics.LargeBonus,
+                SmallBonus = statistics.SmallBonus,
+                MaxCombo = playlistResultResponse.UserScore.MaxCombo
+            },
+            Mods = playlistResultResponse.UserScore.Mods.Select(x => x.Acronym).ToArray()
         };
     }
 

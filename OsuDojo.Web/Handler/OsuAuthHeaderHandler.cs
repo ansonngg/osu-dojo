@@ -1,6 +1,6 @@
 ﻿using System.Net.Http.Headers;
 using System.Security.Claims;
-using OsuDojo.Web.Const;
+using OsuDojo.Web.Utility;
 
 namespace OsuDojo.Web.Handler;
 

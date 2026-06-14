@@ -1,105 +1,73 @@
-﻿using OsuDojo.Application.Query;
-using OsuDojo.Domain.Entity;
-using OsuDojo.Domain.Exam;
-using OsuDojo.Domain.Utility;
+﻿using System.Text.Json;
+using OsuDojo.Application.Query;
+using OsuDojo.Exam.Criteria;
+using OsuDojo.Exam.Stage;
 
 namespace OsuDojo.Application.Exam;
 
-public class ExamTracker
+public class ExamTracker<T> : IExamTracker where T : IGradeCutoff
 {
-    private readonly ExamBeatmap[] _examBeatmaps;
-    private readonly PassEvaluator _passEvaluator = new();
-    private int _currentStage;
+    private readonly ExamBeatmapStage<T>[] _beatmapStages;
+    private readonly ExamStage<T> _finalStage = new();
+    private int _currentStageIndex;
 
     public ExamTracker(ExamQuery examQuery, int[] playlistIds, int[] totalLengths)
     {
-        var beatmapCount = examQuery.BeatmapIds.Length;
-        _examBeatmaps = new ExamBeatmap[beatmapCount];
+        var beatmapCount = examQuery.ExamContent.BeatmapContents.Length;
+        _beatmapStages = new ExamBeatmapStage<T>[beatmapCount];
 
         for (var i = 0; i < beatmapCount; i++)
         {
-            _examBeatmaps[i] = new ExamBeatmap(examQuery.BeatmapIds[i], playlistIds[i], totalLengths[i]);
+            _beatmapStages[i] = new ExamBeatmapStage<T>(
+                examQuery.ExamContent.BeatmapContents[i].BeatmapId,
+                playlistIds[i],
+                totalLengths[i]);
 
-            _examBeatmaps[i].SetUpCriteria(
-                examQuery.SpecificGreatCounts?.Split(beatmapCount, i),
-                examQuery.SpecificOkCounts?.Split(beatmapCount, i),
-                examQuery.SpecificMissCounts?.Split(beatmapCount, i),
-                examQuery.SpecificLargeBonusCounts?.Split(beatmapCount, i),
-                examQuery.SpecificMaxCombos?.Split(beatmapCount, i),
-                examQuery.SpecificHitCounts?.Split(beatmapCount, i));
+            _beatmapStages[i].SetUpCriteria(
+                examQuery.ExamContent.BeatmapContents[i].GradeCutoffs.Select(x => x.Deserialize<T>()));
         }
 
-        _passEvaluator.SetUpCriteria(
-            examQuery.GeneralGreatCounts,
-            examQuery.GeneralOkCounts,
-            examQuery.GeneralMissCounts,
-            examQuery.GeneralLargeBonusCounts,
-            examQuery.GeneralMaxCombos,
-            examQuery.GeneralHitCounts);
+        _finalStage.SetUpCriteria(examQuery.ExamContent.OverallGradeCutoffs.Select(x => x.Deserialize<T>()));
     }
 
-    public int CurrentStage => Math.Min(_currentStage + 1, _examBeatmaps.Length);
-    public int CurrentPlaylistId => !IsEnded ? _examBeatmaps[_currentStage].PlaylistId : 0;
-    public int CurrentBeatmapId => !IsEnded ? _examBeatmaps[_currentStage].Id : 0;
-    public int CurrentBeatmapLength => !IsEnded ? _examBeatmaps[_currentStage].Length : 0;
-    public bool IsEnded => _currentStage >= _examBeatmaps.Length;
-    public int[] GreatCounts => _examBeatmaps.Select(x => x.Result.GreatCount).ToArray();
-    public int[] OkCounts => _examBeatmaps.Select(x => x.Result.OkCount).ToArray();
-    public int[] MissCounts => _examBeatmaps.Select(x => x.Result.MissCount).ToArray();
-    public int[] LargeBonusCounts => _examBeatmaps.Select(x => x.Result.LargeBonusCount).ToArray();
-    public int[] MaxCombos => _examBeatmaps.Select(x => x.Result.MaxCombo).ToArray();
-    public int[] HitCounts => _examBeatmaps.Select(x => x.Result.HitCount).ToArray();
-    public int PassLevel { get; private set; }
+    public int CurrentStage => Math.Min(_currentStageIndex + 1, _beatmapStages.Length);
+    public int CurrentPlaylistId => !IsEnded ? _beatmapStages[_currentStageIndex].PlaylistId : 0;
+    public int CurrentBeatmapId => !IsEnded ? _beatmapStages[_currentStageIndex].Id : 0;
+    public int CurrentBeatmapLength => !IsEnded ? _beatmapStages[_currentStageIndex].Length : 0;
+    public bool IsEnded => _currentStageIndex >= _beatmapStages.Length;
+    public StageResult[] StageResults => _beatmapStages.Select(x => (StageResult)x.Result).ToArray();
+    public int PassGrade { get; private set; }
 
     public bool IsModListValid(string[] mods)
     {
-        // TODO: Might implement real mod list checking later
+        // TODO: Might implement real mod list check if necessary
         return mods.Length == 0;
     }
 
-    public bool Judge(BeatmapResultQuery beatmapResultQuery)
+    public bool TryAdvance(BeatmapResultQuery beatmapResultQuery)
     {
         if (IsEnded)
         {
             throw new InvalidOperationException("Exam has already ended.");
         }
 
-        var stageResult = new StageResult
-        {
-            GreatCount = beatmapResultQuery.GreatCount,
-            OkCount = beatmapResultQuery.OkCount,
-            MissCount = beatmapResultQuery.MissCount,
-            LargeBonusCount = beatmapResultQuery.LargeBonusCount,
-            MaxCombo = beatmapResultQuery.MaxCombo,
-            HitCount = beatmapResultQuery.HitCount
-        };
+        var beatmapPassGrade = _beatmapStages[_currentStageIndex].Evaluate(beatmapResultQuery.Result);
+        PassGrade = _currentStageIndex == 0 ? beatmapPassGrade : Math.Min(PassGrade, beatmapPassGrade);
 
-        var beatmapPassLevel = _examBeatmaps[_currentStage].Evaluate(stageResult);
-        PassLevel = _currentStage == 0 ? beatmapPassLevel : Math.Min(PassLevel, beatmapPassLevel);
-
-        if (PassLevel == 0)
+        if (PassGrade == 0)
         {
             return false;
         }
 
-        _currentStage++;
+        _currentStageIndex++;
 
         if (!IsEnded)
         {
             return true;
         }
 
-        stageResult = new StageResult
-        {
-            GreatCount = _examBeatmaps.Select(x => x.Result.GreatCount).Sum(),
-            OkCount = _examBeatmaps.Select(x => x.Result.OkCount).Sum(),
-            MissCount = _examBeatmaps.Select(x => x.Result.MissCount).Sum(),
-            LargeBonusCount = _examBeatmaps.Select(x => x.Result.LargeBonusCount).Sum(),
-            MaxCombo = _examBeatmaps.Select(x => x.Result.MaxCombo).Sum(),
-            HitCount = _examBeatmaps.Select(x => x.Result.HitCount).Sum()
-        };
-
-        PassLevel = Math.Min(PassLevel, _passEvaluator.Evaluate(stageResult));
-        return PassLevel > 0;
+        var finalResult = StageResults.Aggregate(new StageResult(), (current, next) => current + next);
+        PassGrade = Math.Min(PassGrade, _finalStage.Evaluate(finalResult));
+        return PassGrade > 0;
     }
 }

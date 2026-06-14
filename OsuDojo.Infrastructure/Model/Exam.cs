@@ -9,45 +9,18 @@ public class Exam : BaseModel
     [PrimaryKey("id")]
     public int Id { get; init; }
 
-    [Column("grade")]
-    public int Grade { get; init; }
+    [Column("game_mode")]
+    public string GameMode { get; init; } = string.Empty;
 
-    [Column("beatmap_ids")]
-    public int[] BeatmapIds { get; init; } = [];
+    [Column("rank")]
+    public int Rank { get; init; }
 
-    [Column("specific_great_counts")]
-    public int[]? SpecificGreatCounts { get; init; }
+    [Column("exam_content")]
+    public string ExamContent { get; init; } = string.Empty;
 
-    [Column("specific_ok_counts")]
-    public int[]? SpecificOkCounts { get; init; }
+    [Column("required_rank")]
+    public int? RequiredRank { get; init; }
 
-    [Column("specific_miss_counts")]
-    public int[]? SpecificMissCounts { get; init; }
-
-    [Column("specific_large_bonus_counts")]
-    public int[]? SpecificLargeBonusCounts { get; init; }
-
-    [Column("specific_max_combos")]
-    public int[]? SpecificMaxCombos { get; init; }
-
-    [Column("specific_hit_counts")]
-    public int[]? SpecificHitCounts { get; init; }
-
-    [Column("general_great_counts")]
-    public int[]? GeneralGreatCounts { get; init; }
-
-    [Column("general_ok_counts")]
-    public int[]? GeneralOkCounts { get; init; }
-
-    [Column("general_miss_counts")]
-    public int[]? GeneralMissCounts { get; init; }
-
-    [Column("general_large_bonus_counts")]
-    public int[]? GeneralLargeBonusCounts { get; init; }
-
-    [Column("general_max_combos")]
-    public int[]? GeneralMaxCombos { get; init; }
-
-    [Column("general_hit_counts")]
-    public int[]? GeneralHitCounts { get; init; }
+    [Column("is_active")]
+    public bool IsActive { get; init; } = true;
 }

@@ -12,9 +12,18 @@ public class User : BaseModel
     [Column("osu_id")]
     public int OsuId { get; init; }
 
-    [Column("highest_grade_certificate_id")]
-    public int? HighestGradeCertificateId { get; init; }
+    [Column("osu_rank")]
+    public int OsuRank { get; init; }
 
-    [Column("role")]
-    public string Role { get; init; } = "user";
+    [Column("taiko_rank")]
+    public int TaikoRank { get; init; }
+
+    [Column("catch_rank")]
+    public int CatchRank { get; init; }
+
+    [Column("mania_rank")]
+    public int ManiaRank { get; init; }
+
+    [Column("roles")]
+    public string[] Roles { get; init; } = ["user"];
 }

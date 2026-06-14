@@ -1,20 +1,19 @@
-﻿using OsuDojo.Application.Interface;
+﻿using OsuDojo.Application.Repository;
 using OsuDojo.Infrastructure.Model;
 using Supabase.Postgrest;
-using Client = Supabase.Client;
 
 namespace OsuDojo.Infrastructure.Repository;
 
-public class ExamSessionRepository(Client database) : IExamSessionRepository
+public class ExamSessionRepository(Supabase.Client database) : IExamSessionRepository
 {
-    private readonly Client _database = database;
+    private readonly Supabase.Client _database = database;
 
-    public async Task<int> CreateAsync(int osuId, int grade)
+    public async Task<int> CreateAsync(int osuId, int examId)
     {
         var response = await _database
             .From<ExamSession>()
             .Insert(
-                new ExamSession { OsuId = osuId, Grade = grade },
+                new ExamSession { OsuId = osuId, ExamId = examId },
                 new QueryOptions { Returning = QueryOptions.ReturnType.Representation });
 
         return response.Model?.Id ?? throw new NullReferenceException("Returned exam session is null.");

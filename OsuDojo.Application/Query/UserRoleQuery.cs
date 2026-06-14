@@ -3,5 +3,5 @@
 public class UserRoleQuery
 {
     public int UserId { get; init; }
-    public string Role { get; init; } = string.Empty;
+    public required string[] Roles { get; init; }
 }

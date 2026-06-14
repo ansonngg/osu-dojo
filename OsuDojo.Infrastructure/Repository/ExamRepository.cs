@@ -1,21 +1,24 @@
-﻿using Microsoft.Extensions.Caching.Memory;
-using OsuDojo.Application.Interface;
+﻿using System.Text.Json;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
+using OsuDojo.Application.Exam;
 using OsuDojo.Application.Query;
+using OsuDojo.Application.Repository;
 using OsuDojo.Application.Utility;
-using OsuDojo.Infrastructure.Model;
 using Supabase.Postgrest;
-using Client = Supabase.Client;
 
 namespace OsuDojo.Infrastructure.Repository;
 
-public class ExamRepository(Client database, IMemoryCache memoryCache) : IExamRepository
+public class ExamRepository(Supabase.Client database, IMemoryCache memoryCache, ILogger<ExamRepository> logger)
+    : IExamRepository
 {
-    private readonly Client _database = database;
+    private readonly Supabase.Client _database = database;
     private readonly IMemoryCache _memoryCache = memoryCache;
+    private readonly ILogger<ExamRepository> _logger = logger;
 
-    public async Task<ExamQuery[]> GetAllAsync()
+    public async Task<ExamQuery[]> GetAsync(string gameMode)
     {
-        var response = await _database.From<Exam>().Order(x => x.Grade, Constants.Ordering.Ascending).Get();
+        var response = await _database.From<Model.Exam>().Order(x => x.Rank, Constants.Ordering.Ascending).Get();
 
         return response != null
             ? response.Models
@@ -23,21 +26,28 @@ public class ExamRepository(Client database, IMemoryCache memoryCache) : IExamRe
                     x =>
                     {
                         var examQuery = _ConstructExamQuery(x);
-                        _memoryCache.SetTyped(x.Grade, examQuery);
+
+                        if (examQuery == null)
+                        {
+                            return new ExamQuery();
+                        }
+
+                        _memoryCache.SetTyped(x.Rank, examQuery);
                         return examQuery;
                     })
+                .Where(x => x.ExamContent.BeatmapContents.Length > 0)
                 .ToArray()
             : throw new NullReferenceException("Exam response is null.");
     }
 
-    public async Task<ExamQuery?> GetByGradeAsync(int grade)
+    public async Task<ExamQuery?> GetAsync(string gameMode, int rank)
     {
-        if (_memoryCache.TryGetTyped(grade, out ExamQuery? examQuery))
+        if (_memoryCache.TryGetTyped(rank, out ExamQuery? examQuery))
         {
             return examQuery;
         }
 
-        var response = await _database.From<Exam>().Where(x => x.Grade == grade).Single();
+        var response = await _database.From<Model.Exam>().Where(x => x.Rank == rank).Single();
 
         if (response == null)
         {
@@ -45,54 +55,47 @@ public class ExamRepository(Client database, IMemoryCache memoryCache) : IExamRe
         }
 
         examQuery = _ConstructExamQuery(response);
-        _memoryCache.SetTyped(grade, examQuery);
+
+        if (examQuery != null)
+        {
+            _memoryCache.SetTyped(rank, examQuery);
+        }
+
         return examQuery;
     }
 
-    public async Task CreateAsync(int grade, ExamQuery examQuery)
+    public async Task CreateAsync(string gameMode, int rank, ExamContent examContent, int? requiredRank)
     {
         await _database
-            .From<Exam>()
+            .From<Model.Exam>()
             .Insert(
-                new Exam
+                new Model.Exam
                 {
-                    Grade = grade,
-                    BeatmapIds = examQuery.BeatmapIds,
-                    SpecificGreatCounts = examQuery.SpecificGreatCounts,
-                    SpecificOkCounts = examQuery.SpecificOkCounts,
-                    SpecificMissCounts = examQuery.SpecificMissCounts,
-                    SpecificLargeBonusCounts = examQuery.SpecificLargeBonusCounts,
-                    SpecificMaxCombos = examQuery.SpecificMaxCombos,
-                    SpecificHitCounts = examQuery.SpecificHitCounts,
-                    GeneralGreatCounts = examQuery.GeneralGreatCounts,
-                    GeneralOkCounts = examQuery.GeneralOkCounts,
-                    GeneralMissCounts = examQuery.GeneralMissCounts,
-                    GeneralLargeBonusCounts = examQuery.GeneralLargeBonusCounts,
-                    GeneralMaxCombos = examQuery.GeneralMaxCombos,
-                    GeneralHitCounts = examQuery.GeneralHitCounts
+                    GameMode = gameMode,
+                    Rank = rank,
+                    ExamContent = JsonSerializer.Serialize(examContent),
+                    RequiredRank = requiredRank
                 });
 
-        _memoryCache.RemoveTyped<ExamQuery>(grade);
+        _memoryCache.RemoveTyped<ExamQuery>(rank);
     }
 
-    private static ExamQuery _ConstructExamQuery(Exam exam)
+    private ExamQuery? _ConstructExamQuery(Model.Exam exam)
     {
-        return new ExamQuery
+        var examContent = JsonSerializer.Deserialize<ExamContent>(exam.ExamContent);
+
+        if (examContent != null)
         {
-            Grade = exam.Grade,
-            BeatmapIds = exam.BeatmapIds,
-            SpecificGreatCounts = exam.SpecificGreatCounts,
-            SpecificOkCounts = exam.SpecificOkCounts,
-            SpecificMissCounts = exam.SpecificMissCounts,
-            SpecificLargeBonusCounts = exam.SpecificLargeBonusCounts,
-            SpecificMaxCombos = exam.SpecificMaxCombos,
-            SpecificHitCounts = exam.SpecificHitCounts,
-            GeneralGreatCounts = exam.GeneralGreatCounts,
-            GeneralOkCounts = exam.GeneralOkCounts,
-            GeneralMissCounts = exam.GeneralMissCounts,
-            GeneralLargeBonusCounts = exam.GeneralLargeBonusCounts,
-            GeneralMaxCombos = exam.GeneralMaxCombos,
-            GeneralHitCounts = exam.GeneralHitCounts
-        };
+            return new ExamQuery
+            {
+                ExamId = exam.Id,
+                Rank = exam.Rank,
+                ExamContent = examContent,
+                RequiredRank = exam.RequiredRank
+            };
+        }
+
+        _logger.LogError("Failed to deserialize exam content with id {ExamId}.", exam.Id);
+        return null;
     }
 }

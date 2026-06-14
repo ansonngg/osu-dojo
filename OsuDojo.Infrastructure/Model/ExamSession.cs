@@ -12,8 +12,8 @@ public class ExamSession : BaseModel
     [Column("osu_id")]
     public int OsuId { get; init; }
 
-    [Column("grade")]
-    public int Grade { get; init; }
+    [Column("exam_id")]
+    public int ExamId { get; init; }
 
     [Column("last_reached_stage")]
     public int LastReachedStage { get; init; } = 1;
