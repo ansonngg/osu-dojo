@@ -12,6 +12,9 @@ public class User : BaseModel
     [Column("osu_id")]
     public int OsuId { get; init; }
 
+    [Column("roles")]
+    public string[] Roles { get; init; } = ["user"];
+
     [Column("osu_rank")]
     public int OsuRank { get; init; }
 
@@ -23,7 +26,4 @@ public class User : BaseModel
 
     [Column("mania_rank")]
     public int ManiaRank { get; init; }
-
-    [Column("roles")]
-    public string[] Roles { get; init; } = ["user"];
 }
