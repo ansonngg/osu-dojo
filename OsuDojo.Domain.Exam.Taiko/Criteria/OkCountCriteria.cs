@@ -1,7 +1,7 @@
-﻿using OsuDojo.Exam.Criteria;
-using OsuDojo.Exam.Stage;
+﻿using OsuDojo.Domain.Exam.Criteria;
+using OsuDojo.Domain.Exam.Stage;
 
-namespace OsuDojo.Exam.Taiko.Criteria;
+namespace OsuDojo.Domain.Exam.Taiko.Criteria;
 
 public class OkCountCriteria(int threshold) : CriteriaBase(threshold)
 {

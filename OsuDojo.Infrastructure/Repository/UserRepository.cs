@@ -32,9 +32,12 @@ public class UserRepository(Supabase.Client database) : IUserRepository
                     .Where(x => x.OsuId == osuId)
                     .Single();
 
-                return response != null
-                    ? new UserRankQuery { Rank = response.OsuRank }
-                    : throw new NullReferenceException("Returned user is null.");
+                if (response != null)
+                {
+                    return new UserRankQuery { Rank = response.OsuRank };
+                }
+
+                break;
             }
             case "taiko":
             {
@@ -44,9 +47,12 @@ public class UserRepository(Supabase.Client database) : IUserRepository
                     .Where(x => x.OsuId == osuId)
                     .Single();
 
-                return response != null
-                    ? new UserRankQuery { Rank = response.TaikoRank }
-                    : throw new NullReferenceException("Returned user is null.");
+                if (response != null)
+                {
+                    return new UserRankQuery { Rank = response.TaikoRank };
+                }
+
+                break;
             }
             case "catch":
             {
@@ -56,11 +62,14 @@ public class UserRepository(Supabase.Client database) : IUserRepository
                     .Where(x => x.OsuId == osuId)
                     .Single();
 
-                return response != null
-                    ? new UserRankQuery { Rank = response.CatchRank }
-                    : throw new NullReferenceException("Returned user is null.");
+                if (response != null)
+                {
+                    return new UserRankQuery { Rank = response.CatchRank };
+                }
+
+                break;
             }
-            default:
+            case "mania":
             {
                 var response = await _database
                     .From<User>()
@@ -68,11 +77,20 @@ public class UserRepository(Supabase.Client database) : IUserRepository
                     .Where(x => x.OsuId == osuId)
                     .Single();
 
-                return response != null
-                    ? new UserRankQuery { Rank = response.ManiaRank }
-                    : throw new NullReferenceException("Returned user is null.");
+                if (response != null)
+                {
+                    return new UserRankQuery { Rank = response.ManiaRank };
+                }
+
+                break;
+            }
+            default:
+            {
+                throw new InvalidOperationException($"Game mode {gameMode} is not supported.");
             }
         }
+
+        throw new NullReferenceException("Returned user is null.");
     }
 
     public async Task<UserRoleQuery> CreateAsync(int osuId)
@@ -88,7 +106,7 @@ public class UserRepository(Supabase.Client database) : IUserRepository
             : throw new NullReferenceException("Returned user is null.");
     }
 
-    public async Task UpdateHighestRankCertificateAsync(int userId, string gameMode, int rank, int rankCertificateId)
+    public async Task UpdateUserBestCertificateAsync(int userId, string gameMode, int rank, int rankCertificateId)
     {
         await _database.Rpc(
             "update_user_best_certificate",

@@ -1,9 +1,9 @@
 ﻿using System.Reflection;
-using OsuDojo.Exam.Criteria;
+using OsuDojo.Domain.Exam.Criteria;
 
-namespace OsuDojo.Exam.Stage;
+namespace OsuDojo.Domain.Exam.Stage;
 
-public class ExamStage<T> where T : IGradeCutoff
+public class ExamStage<T> where T : ICriteriaTable
 {
     private readonly List<CriteriaSet> _criteriaSets = [];
 

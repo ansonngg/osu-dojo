@@ -12,8 +12,8 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\OsuDojo.Exam.Taiko\OsuDojo.Exam.Taiko.csproj" />
-        <ProjectReference Include="..\OsuDojo.Exam\OsuDojo.Exam.csproj" />
+        <ProjectReference Include="..\OsuDojo.Domain.Exam.Taiko\OsuDojo.Domain.Exam.Taiko.csproj" />
+        <ProjectReference Include="..\OsuDojo.Domain.Exam\OsuDojo.Domain.Exam.csproj" />
     </ItemGroup>
 
 </Project>

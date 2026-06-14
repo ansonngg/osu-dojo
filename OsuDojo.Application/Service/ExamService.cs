@@ -1,6 +1,6 @@
 ﻿using OsuDojo.Application.Exam;
 using OsuDojo.Application.Query;
-using OsuDojo.Exam.Taiko.Criteria;
+using OsuDojo.Domain.Exam.Taiko.Criteria;
 
 namespace OsuDojo.Application.Service;
 
@@ -10,7 +10,11 @@ public class ExamService : IExamService
     {
         return gameMode switch
         {
-            _ => new ExamTracker<TaikoGradeCutoff>(examQuery, playlistIds, totalLengths)
+            "osu" => throw new NotImplementedException(),
+            "taiko" => new ExamTracker<TaikoCriteriaTable>(examQuery, playlistIds, totalLengths),
+            "catch" => throw new NotImplementedException(),
+            "mania" => throw new NotImplementedException(),
+            _ => throw new NotImplementedException()
         };
     }
 }

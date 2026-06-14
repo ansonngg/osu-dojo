@@ -1,7 +1,7 @@
 <Solution>
-  <Project Path="OsuDojo.Application/OsuDojo.Application.csproj" />
-  <Project Path="OsuDojo.Exam.Taiko/OsuDojo.Exam.Taiko.csproj" />
-  <Project Path="OsuDojo.Exam/OsuDojo.Exam.csproj" />
-  <Project Path="OsuDojo.Infrastructure/OsuDojo.Infrastructure.csproj" />
-  <Project Path="OsuDojo.Web/OsuDojo.Web.csproj" />
+    <Project Path="OsuDojo.Application/OsuDojo.Application.csproj" />
+    <Project Path="OsuDojo.Domain.Exam.Taiko/OsuDojo.Domain.Exam.Taiko.csproj" />
+    <Project Path="OsuDojo.Domain.Exam/OsuDojo.Domain.Exam.csproj" />
+    <Project Path="OsuDojo.Infrastructure/OsuDojo.Infrastructure.csproj" />
+    <Project Path="OsuDojo.Web/OsuDojo.Web.csproj" />
 </Solution>

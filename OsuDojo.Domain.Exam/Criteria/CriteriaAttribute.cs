@@ -1,4 +1,4 @@
-﻿namespace OsuDojo.Exam.Criteria;
+﻿namespace OsuDojo.Domain.Exam.Criteria;
 
 [AttributeUsage(AttributeTargets.Property)]
 public class CriteriaAttribute(Type criteriaType) : Attribute

@@ -1,8 +1,8 @@
-﻿using OsuDojo.Exam.Criteria;
+﻿using OsuDojo.Domain.Exam.Criteria;
 
-namespace OsuDojo.Exam.Taiko.Criteria;
+namespace OsuDojo.Domain.Exam.Taiko.Criteria;
 
-public class TaikoGradeCutoff : IGradeCutoff
+public class TaikoCriteriaTable : ICriteriaTable
 {
     [Criteria(typeof(GreatCountCriteria))]
     public int GreatCount { get; init; }

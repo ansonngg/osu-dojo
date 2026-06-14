@@ -1,5 +1,5 @@
 ﻿using System.Text.Json.Serialization;
-using OsuDojo.Exam.Stage;
+using OsuDojo.Domain.Exam.Stage;
 
 namespace OsuDojo.Application.Exam;
 

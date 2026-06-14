@@ -1,8 +1,8 @@
-﻿using OsuDojo.Exam.Criteria;
+﻿using OsuDojo.Domain.Exam.Criteria;
 
-namespace OsuDojo.Exam.Stage;
+namespace OsuDojo.Domain.Exam.Stage;
 
-public class ExamBeatmapStage<T>(int beatmapId, int playlistId, int length) : ExamStage<T> where T : IGradeCutoff
+public class ExamBeatmapStage<T>(int beatmapId, int playlistId, int length) : ExamStage<T> where T : ICriteriaTable
 {
     private IStageResult? _result;
 

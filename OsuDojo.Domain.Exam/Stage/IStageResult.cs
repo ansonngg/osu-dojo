@@ -1,4 +1,4 @@
-﻿namespace OsuDojo.Exam.Stage;
+﻿namespace OsuDojo.Domain.Exam.Stage;
 
 public interface IStageResult
 {

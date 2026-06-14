@@ -57,7 +57,7 @@ public class BeatmapResultPollingWorker(
                     _examSessionContext.ExamTracker.PassGrade,
                     _examSessionContext.ExamTracker.StageResults);
 
-                await _userRepository.UpdateHighestRankCertificateAsync(
+                await _userRepository.UpdateUserBestCertificateAsync(
                     _examSessionContext.UserId,
                     _examSessionContext.GameMode,
                     _examSessionContext.Rank,

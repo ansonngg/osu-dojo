@@ -5,16 +5,16 @@ WORKDIR /app
 # Copy solution and restore dependencies
 COPY OsuDojo.slnx ./
 COPY OsuDojo.Application/*.csproj ./OsuDojo.Application/
-COPY OsuDojo.Exam/*.csproj ./OsuDojo.Exam/
-COPY OsuDojo.Exam.Taiko/*.csproj ./OsuDojo.Exam.Taiko/
+COPY OsuDojo.Domain.Exam/*.csproj ./OsuDojo.Domain.Exam/
+COPY OsuDojo.Domain.Exam.Taiko/*.csproj ./OsuDojo.Domain.Exam.Taiko/
 COPY OsuDojo.Infrastructure/*.csproj ./OsuDojo.Infrastructure/
 COPY OsuDojo.Web/*.csproj ./OsuDojo.Web/
 RUN dotnet restore
 
 # Copy all source files and build
 COPY OsuDojo.Application/. ./OsuDojo.Application/
-COPY OsuDojo.Exam/. ./OsuDojo.Exam/
-COPY OsuDojo.Exam.Taiko/. ./OsuDojo.Exam.Taiko/
+COPY OsuDojo.Domain.Exam/. ./OsuDojo.Domain.Exam/
+COPY OsuDojo.Domain.Exam.Taiko/. ./OsuDojo.Domain.Exam.Taiko/
 COPY OsuDojo.Infrastructure/. ./OsuDojo.Infrastructure/
 COPY OsuDojo.Web/. ./OsuDojo.Web/
 WORKDIR /app/OsuDojo.Web

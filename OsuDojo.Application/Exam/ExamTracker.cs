@@ -1,11 +1,11 @@
 ﻿using System.Text.Json;
 using OsuDojo.Application.Query;
-using OsuDojo.Exam.Criteria;
-using OsuDojo.Exam.Stage;
+using OsuDojo.Domain.Exam.Criteria;
+using OsuDojo.Domain.Exam.Stage;
 
 namespace OsuDojo.Application.Exam;
 
-public class ExamTracker<T> : IExamTracker where T : IGradeCutoff
+public class ExamTracker<T> : IExamTracker where T : ICriteriaTable
 {
     private readonly ExamBeatmapStage<T>[] _beatmapStages;
     private readonly ExamStage<T> _finalStage = new();

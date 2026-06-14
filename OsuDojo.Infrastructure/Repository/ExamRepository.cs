@@ -5,6 +5,7 @@ using OsuDojo.Application.Exam;
 using OsuDojo.Application.Query;
 using OsuDojo.Application.Repository;
 using OsuDojo.Application.Utility;
+using OsuDojo.Infrastructure.Model;
 using Supabase.Postgrest;
 
 namespace OsuDojo.Infrastructure.Repository;
@@ -18,7 +19,7 @@ public class ExamRepository(Supabase.Client database, IMemoryCache memoryCache, 
 
     public async Task<ExamQuery[]> GetAsync(string gameMode)
     {
-        var response = await _database.From<Model.Exam>().Order(x => x.Rank, Constants.Ordering.Ascending).Get();
+        var response = await _database.From<Exam>().Order(x => x.Rank, Constants.Ordering.Ascending).Get();
 
         return response != null
             ? response.Models
@@ -47,7 +48,7 @@ public class ExamRepository(Supabase.Client database, IMemoryCache memoryCache, 
             return examQuery;
         }
 
-        var response = await _database.From<Model.Exam>().Where(x => x.Rank == rank).Single();
+        var response = await _database.From<Exam>().Where(x => x.Rank == rank).Single();
 
         if (response == null)
         {
@@ -67,9 +68,9 @@ public class ExamRepository(Supabase.Client database, IMemoryCache memoryCache, 
     public async Task CreateAsync(string gameMode, int rank, ExamContent examContent, int? requiredRank)
     {
         await _database
-            .From<Model.Exam>()
+            .From<Exam>()
             .Insert(
-                new Model.Exam
+                new Exam
                 {
                     GameMode = gameMode,
                     Rank = rank,
@@ -80,7 +81,7 @@ public class ExamRepository(Supabase.Client database, IMemoryCache memoryCache, 
         _memoryCache.RemoveTyped<ExamQuery>(rank);
     }
 
-    private ExamQuery? _ConstructExamQuery(Model.Exam exam)
+    private ExamQuery? _ConstructExamQuery(Exam exam)
     {
         var examContent = JsonSerializer.Deserialize<ExamContent>(exam.ExamContent);
 
