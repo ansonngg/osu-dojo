@@ -66,7 +66,14 @@ public class ExamController(
     {
         if (request.GameMode is not ("osu" or "taiko" or "catch" or "mania"))
         {
-            return BadRequest();
+            return BadRequest($"Game mode {request.GameMode} is not supported.");
+        }
+
+        if (request.ExamContent
+            .BeatmapContents
+            .Any(x => x.CriteriaTables.Length != request.ExamContent.CriteriaTables.Length))
+        {
+            return BadRequest("The lengths of criteria tables are not consistent.");
         }
 
         await _examRepository.CreateAsync(request.GameMode, request.Rank, request.ExamContent, request.RequiredRank);
@@ -75,7 +82,7 @@ public class ExamController(
 
     [Authorize]
     [HttpPost("{gameMode:regex(^(osu|taiko|catch|mania)$)}/{rank:int}")]
-    public async Task<IActionResult> StartExamSession(string gameMode, int rank)
+    public async Task<IActionResult> StartExam(string gameMode, int rank)
     {
         var examQuery = await _examRepository.GetAsync(gameMode, rank);
 

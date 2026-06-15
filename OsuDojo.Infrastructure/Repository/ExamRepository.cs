@@ -19,7 +19,11 @@ public class ExamRepository(Supabase.Client database, IMemoryCache memoryCache, 
 
     public async Task<ExamQuery[]> GetAsync(string gameMode)
     {
-        var response = await _database.From<Exam>().Order(x => x.Rank, Constants.Ordering.Ascending).Get();
+        var response = await _database
+            .From<Exam>()
+            .Where(x => x.IsActive == true && x.GameMode == gameMode)
+            .Order(x => x.Rank, Constants.Ordering.Ascending)
+            .Get();
 
         return response != null
             ? response.Models
@@ -33,7 +37,7 @@ public class ExamRepository(Supabase.Client database, IMemoryCache memoryCache, 
                             return new ExamQuery();
                         }
 
-                        _memoryCache.SetTyped(x.Rank, examQuery);
+                        _memoryCache.SetTyped(_ConstructExamCacheKey(gameMode, x.Rank), examQuery);
                         return examQuery;
                     })
                 .Where(x => x.ExamContent.BeatmapContents.Length > 0)
@@ -43,12 +47,17 @@ public class ExamRepository(Supabase.Client database, IMemoryCache memoryCache, 
 
     public async Task<ExamQuery?> GetAsync(string gameMode, int rank)
     {
-        if (_memoryCache.TryGetTyped(rank, out ExamQuery? examQuery))
+        var examCacheKey = _ConstructExamCacheKey(gameMode, rank);
+
+        if (_memoryCache.TryGetTyped(examCacheKey, out ExamQuery? examQuery))
         {
             return examQuery;
         }
 
-        var response = await _database.From<Exam>().Where(x => x.Rank == rank).Single();
+        var response = await _database
+            .From<Exam>()
+            .Where(x => x.IsActive == true && x.GameMode == gameMode && x.Rank == rank)
+            .Single();
 
         if (response == null)
         {
@@ -59,7 +68,7 @@ public class ExamRepository(Supabase.Client database, IMemoryCache memoryCache, 
 
         if (examQuery != null)
         {
-            _memoryCache.SetTyped(rank, examQuery);
+            _memoryCache.SetTyped(examCacheKey, examQuery);
         }
 
         return examQuery;
@@ -78,7 +87,7 @@ public class ExamRepository(Supabase.Client database, IMemoryCache memoryCache, 
                     RequiredRank = requiredRank
                 });
 
-        _memoryCache.RemoveTyped<ExamQuery>(rank);
+        _memoryCache.RemoveTyped<ExamQuery>(_ConstructExamCacheKey(gameMode, rank));
     }
 
     private ExamQuery? _ConstructExamQuery(Exam exam)
@@ -98,5 +107,10 @@ public class ExamRepository(Supabase.Client database, IMemoryCache memoryCache, 
 
         _logger.LogError("Failed to deserialize exam content with id {ExamId}.", exam.Id);
         return null;
+    }
+
+    private static string _ConstructExamCacheKey(string gameMode, int rank)
+    {
+        return $"{gameMode}_{rank}";
     }
 }

@@ -35,7 +35,10 @@ public class ExamTracker<T> : IExamTracker where T : ICriteriaTable
     public int CurrentBeatmapId => !IsEnded ? _beatmapStages[_currentStageIndex].Id : 0;
     public int CurrentBeatmapLength => !IsEnded ? _beatmapStages[_currentStageIndex].Length : 0;
     public bool IsEnded => _currentStageIndex >= _beatmapStages.Length;
-    public StageResult[] StageResults => _beatmapStages.Select(x => (StageResult)x.Result).ToArray();
+
+    public StageResult[] StageResults =>
+        _beatmapStages.Select(x => x.Result as StageResult ?? new StageResult()).ToArray();
+
     public int PassGrade { get; private set; }
 
     public bool IsModListValid(string[] mods)

@@ -11,16 +11,16 @@ public class ExamStage<T> where T : ICriteriaTable
     {
         for (var i = 0; i < _criteriaSets.Count; i++)
         {
-            if (_criteriaSets[i].IsPassed(stageResult))
+            if (!_criteriaSets[i].IsPassed(stageResult))
             {
-                return _criteriaSets.Count - i;
+                return i;
             }
         }
 
-        return 0;
+        return _criteriaSets.Count;
     }
 
-    public void SetUpCriteria(IEnumerable<T?> gradeCutoffs)
+    public void SetUpCriteria(IEnumerable<T?> criteriaTables)
     {
         var propertyCriteriaTypePair = typeof(T)
             .GetProperties()
@@ -28,13 +28,13 @@ public class ExamStage<T> where T : ICriteriaTable
             .Select(x => (x, x.GetCustomAttribute<CriteriaAttribute>(true)!.CriteriaType))
             .ToArray();
 
-        foreach (var gradeCutoff in gradeCutoffs)
+        foreach (var criteriaTable in criteriaTables)
         {
             var criteriaSet = new CriteriaSet();
 
             foreach (var (property, criteriaType) in propertyCriteriaTypePair)
             {
-                var propertyValue = property.GetValue(gradeCutoff);
+                var propertyValue = property.GetValue(criteriaTable);
 
                 if (propertyValue == null)
                 {
